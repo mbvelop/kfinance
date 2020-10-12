@@ -1,0 +1,114 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+import io.gitlab.arturbosch.detekt.Detekt
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Date
+
+plugins {
+    kotlin("jvm") version "1.4.10"
+    id("com.diffplug.spotless") version "5.6.1"
+    id("io.gitlab.arturbosch.detekt") version "1.14.1"
+    id("com.github.ben-manes.versions") version "0.33.0"
+    id("maven-publish")
+    id("org.jetbrains.dokka") version "1.4.10"
+}
+
+val javaVersion = JavaVersion.VERSION_1_8
+
+val pomDesc = "A kotlin library with a set of finance functions similar to numpy-financial"
+val artifactName = "kfinance"
+val artifactGroup = "com.mbvelop"
+group = artifactGroup
+val artifactVersion = "0.1.0"
+version = artifactVersion
+
+spotless {
+    val ktlintVersion = "0.38.0"
+    kotlin {
+        ktlint(ktlintVersion)
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+
+        ktlint(ktlintVersion)
+    }
+}
+
+detekt {
+    failFast = true
+    buildUponDefaultConfig = true
+    config = files("$projectDir/detekt.yaml")
+    baseline = file("$projectDir/detekt-baseline.xml")
+}
+
+tasks {
+    withType<Detekt> {
+        this.jvmTarget = javaVersion.toString()
+    }
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
+}
+
+tasks.named("dependencyUpdates", DependencyUpdatesTask::class.java).configure {
+    rejectVersionIf {
+        isNonStable(candidate.version)
+    }
+
+    revision = "release"
+    gradleReleaseChannel = "current"
+}
+
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    val kotestVersion = "4.3.0"
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion") {
+        exclude("junit")
+        exclude("org.junit.vintage")
+    }
+    testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-arrow-jvm:$kotestVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+
+    testImplementation("io.mockk:mockk:1.10.2")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions.jvmTarget = javaVersion.toString()
+
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions.jvmTarget = javaVersion.toString()
+
+java {
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+}
+
+val dokkaJar by tasks.creating(Jar::class) {
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = "Assembles Kotlin docs with Dokka"
+    archiveClassifier.set("javadoc")
+    from(tasks.dokkaJavadoc)
+}
+
+val sourcesJar by tasks.creating(Jar::class) {
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = "Assembles sources JAR"
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
