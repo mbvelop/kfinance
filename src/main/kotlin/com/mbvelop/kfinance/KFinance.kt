@@ -22,11 +22,13 @@ import kotlin.math.pow
  *
  * @return Payment against loan plus interest (the (fixed) periodic payment).
  */
-public fun pmt(interestRate: Double,
-               numberOfPeriods: Double,
-               presentValue: Double,
-               futureValue: Double = 0.0,
-               paymentSchedule: PaymentSchedule = END): Double {
+public fun pmt(
+    interestRate: Double,
+    numberOfPeriods: Double,
+    presentValue: Double,
+    futureValue: Double = 0.0,
+    paymentSchedule: PaymentSchedule = END
+): Double {
 
     val temp = (1 + interestRate).pow(numberOfPeriods)
     val mask = (interestRate == 0.0)
