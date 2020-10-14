@@ -68,9 +68,12 @@ tasks.wrapper {
 repositories {
     mavenCentral()
     jcenter()
+    maven("https://dl.bintray.com/mipt-npm/scientifik")
 }
 
 dependencies {
+    implementation("kscience.kmath:kmath-core:0.1.4")
+
     val kotestVersion = "4.3.0"
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion") {
         exclude("junit")
