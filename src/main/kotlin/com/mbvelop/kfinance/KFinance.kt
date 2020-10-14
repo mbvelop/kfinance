@@ -23,11 +23,13 @@ import kotlin.math.pow
  *
  * @return Payment (including interest) made in each period.
  */
-public fun totalPayment(interestRate: Double,
-                        numberOfPeriods: Double,
-                        presentValue: Double,
-                        futureValue: Double = 0.0,
-                        paymentSchedule: PaymentSchedule = END): Double {
+public fun totalPayment(
+    interestRate: Double,
+    numberOfPeriods: Double,
+    presentValue: Double,
+    futureValue: Double = 0.0,
+    paymentSchedule: PaymentSchedule = END
+): Double {
 
     val temp = (1 + interestRate).pow(numberOfPeriods)
     val mask = (interestRate == 0.0)
@@ -56,11 +58,13 @@ public fun totalPayment(interestRate: Double,
  * @return Future value
  */
 
-public fun futureValue(interestRate: Double,
-                       numberOfPeriods: Double,
-                       totalPayment: Double,
-                       presentValue: Double = 0.0,
-                       paymentSchedule: PaymentSchedule = END): Double {
+public fun futureValue(
+    interestRate: Double,
+    numberOfPeriods: Double,
+    totalPayment: Double,
+    presentValue: Double = 0.0,
+    paymentSchedule: PaymentSchedule = END
+): Double {
 
     val temp = if (interestRate != 0.0) {
         (1 + interestRate).pow(numberOfPeriods)
@@ -69,8 +73,12 @@ public fun futureValue(interestRate: Double,
     }
 
     return if (interestRate != 0.0) {
-        (-presentValue * temp - totalPayment * (1 + interestRate *
-            paymentSchedule.numericValue) / interestRate * (temp - 1.0))
+        (
+            -presentValue * temp - totalPayment * (
+                1 + interestRate *
+                    paymentSchedule.numericValue
+                ) / interestRate * (temp - 1.0)
+            )
     } else {
         -(presentValue + totalPayment * numberOfPeriods)
     }
