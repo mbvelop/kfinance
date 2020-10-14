@@ -1,7 +1,6 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.Date
 
 plugins {
     kotlin("jvm") version "1.4.10"
