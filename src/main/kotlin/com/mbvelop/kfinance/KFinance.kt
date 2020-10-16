@@ -7,21 +7,18 @@ import kotlin.math.pow
 /**
  * Compute the payment against loan principal plus interest.
  *
- * Note that computing a monthly mortgage payment is only
- * one use for this function. For example, pmt returns the
- * periodic deposit one must make to achieve a specified
- * future balance given an initial deposit, a fixed,
- * periodically compounded interest rate, and the total
- * number of periods.
+ * Note that computing a monthly mortgage payment is only one use for this function. For example,
+ * totalPayment returns the periodic deposit one must make to achieve a specified future balance
+ * given an initial deposit, a fixed, periodically compounded interest rate, and the total number of
+ * periods.
  *
  * @param interestRate Interest rate per period
  * @param numberOfPeriods Number of payment periods
  * @param presentValue Present value of the investment
  * @param futureValue Future value of the investment
- * @param paymentSchedule When payments are due (END: 0 if they are due
- * at the end of the period; Begin: 1 if they are due at the beginning)
+ * @param paymentSchedule When payments are due
  *
- * @return Payment (including interest) made in each period.
+ * @return Payment against loan (including interest) made in each (fixed) period
  */
 public fun totalPayment(
     interestRate: Double,
@@ -31,31 +28,29 @@ public fun totalPayment(
     paymentSchedule: PaymentSchedule = END
 ): Double {
 
-    val temp = (1 + interestRate).pow(numberOfPeriods)
+    val totalInterestRate = (1 + interestRate).pow(numberOfPeriods)
     val mask = (interestRate == 0.0)
     val maskedRate = if (mask) 1.0 else interestRate
 
     val fact = if (mask) {
         numberOfPeriods
     } else {
-        (1 + maskedRate * paymentSchedule.numericValue) * (temp - 1) / maskedRate
+        (1 + maskedRate * paymentSchedule.numericValue) * (totalInterestRate - 1) / maskedRate
     }
 
-    return -(futureValue + presentValue * temp) / fact
+    return -(futureValue + presentValue * totalInterestRate) / fact
 }
 
 /**
- * Compute the future value of an investment
- * at the end of the payment periods.
+ * Compute the future value of an investment at the end of the payment periods.
  *
  * @param interestRate Interest rate per period
  * @param numberOfPeriods Number of payment periods
- * @param totalPayment Payment (including interest) made in each period.
+ * @param totalPayment Payment (including interest) made in each (fixed) period
  * @param presentValue Present value of the investment
- * @param paymentSchedule When payments are due (END: 0 if they are due
- * at the end of the period; Begin: 1 if they are due at the beginning)
+ * @param paymentSchedule When payments are due
  *
- * @return Future value
+ * @return Future value of the investment
  */
 
 public fun futureValue(
@@ -66,7 +61,7 @@ public fun futureValue(
     paymentSchedule: PaymentSchedule = END
 ): Double {
 
-    val temp = if (interestRate != 0.0) {
+    val totalInterestRate = if (interestRate != 0.0) {
         (1 + interestRate).pow(numberOfPeriods)
     } else {
         0.0
@@ -74,10 +69,10 @@ public fun futureValue(
 
     return if (interestRate != 0.0) {
         (
-            -presentValue * temp - totalPayment * (
+            -presentValue * totalInterestRate - totalPayment * (
                 1 + interestRate *
                     paymentSchedule.numericValue
-                ) / interestRate * (temp - 1.0)
+                ) / interestRate * (totalInterestRate - 1.0)
             )
     } else {
         -(presentValue + totalPayment * numberOfPeriods)
