@@ -4,11 +4,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.4.10"
-    id("com.diffplug.spotless") version "5.6.1"
-    id("io.gitlab.arturbosch.detekt") version "1.14.1"
+    id("com.diffplug.spotless") version "5.7.0"
+    id("io.gitlab.arturbosch.detekt") version "1.14.2"
     id("com.github.ben-manes.versions") version "0.33.0"
     id("maven-publish")
-    id("org.jetbrains.dokka") version "1.4.10"
+    id("org.jetbrains.dokka") version "1.4.10.2"
 }
 
 val javaVersion = JavaVersion.VERSION_1_8
@@ -17,11 +17,11 @@ val pomDesc = "A kotlin library with a set of finance functions similar to numpy
 val artifactName = "kfinance"
 val artifactGroup = "com.mbvelop"
 group = artifactGroup
-val artifactVersion = "0.1.0"
+val artifactVersion = "0.0.1"
 version = artifactVersion
 
 spotless {
-    val ktlintVersion = "0.38.0"
+    val ktlintVersion = "0.39.0"
     kotlin {
         ktlint(ktlintVersion)
     }
@@ -72,8 +72,6 @@ repositories {
 }
 
 dependencies {
-    implementation("kscience.kmath:kmath-core:0.1.4")
-
     val kotestVersion = "4.3.0"
     testImplementation("io.kotest:kotest-runner-junit5-jvm:$kotestVersion") {
         exclude("junit")
