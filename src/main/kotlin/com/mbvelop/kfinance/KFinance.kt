@@ -2,6 +2,7 @@ package com.mbvelop.kfinance
 
 import com.mbvelop.kfinance.enums.PaymentSchedule
 import com.mbvelop.kfinance.enums.PaymentSchedule.END
+import kotlin.math.ln
 import kotlin.math.pow
 
 /**
@@ -27,7 +28,6 @@ public fun totalPayment(
     futureValue: Double = 0.0,
     paymentSchedule: PaymentSchedule = END
 ): Double {
-
     val totalInterestRate = (1 + interestRate).pow(numberOfPeriods)
     val mask = (interestRate == 0.0)
     val maskedRate = if (mask) 1.0 else interestRate
@@ -46,21 +46,19 @@ public fun totalPayment(
  *
  * @param interestRate Interest rate per period
  * @param numberOfPeriods Number of payment periods
- * @param totalPayment Payment (including interest) made in each (fixed) period
+ * @param payment Payment (including interest) made in each (fixed) period
  * @param presentValue Present value of the investment
  * @param paymentSchedule When payments are due
  *
  * @return Future value of the investment
  */
-
 public fun futureValue(
     interestRate: Double,
     numberOfPeriods: Double,
-    totalPayment: Double,
+    payment: Double,
     presentValue: Double = 0.0,
     paymentSchedule: PaymentSchedule = END
 ): Double {
-
     val totalInterestRate = if (interestRate != 0.0) {
         (1 + interestRate).pow(numberOfPeriods)
     } else {
@@ -69,12 +67,39 @@ public fun futureValue(
 
     return if (interestRate != 0.0) {
         (
-            -presentValue * totalInterestRate - totalPayment * (
+            -presentValue * totalInterestRate - payment * (
                 1 + interestRate *
                     paymentSchedule.numericValue
                 ) / interestRate * (totalInterestRate - 1.0)
             )
     } else {
-        -(presentValue + totalPayment * numberOfPeriods)
+        -(presentValue + payment * numberOfPeriods)
+    }
+}
+
+/**
+ * Compute the number of periodic payments needed to pay off loan.
+ *
+ * @param interestRate Interest rate per period
+ * @param payment Payment (including interest) made in each (fixed) period
+ * @param presentValue Present value of the investment
+ * @param futureValue Future value of the investment
+ * @param paymentSchedule When payments are due
+ *
+ * @return Future value of the investment
+ */
+public fun numberOfPeriodicPayments(
+    interestRate: Double,
+    payment: Double,
+    presentValue: Double,
+    futureValue: Double = 0.0,
+    paymentSchedule: PaymentSchedule = END
+): Double {
+    val z = payment * (1 + interestRate * paymentSchedule.numericValue) / interestRate
+
+    return if (interestRate != 0.0) {
+        ln((-futureValue + z) / (presentValue + z)) / ln(1 + interestRate)
+    } else {
+        -(futureValue + presentValue) / payment
     }
 }
