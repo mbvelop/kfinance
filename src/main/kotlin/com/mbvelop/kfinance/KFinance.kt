@@ -103,3 +103,32 @@ public fun numberOfPeriodicPayments(
         -(futureValue + presentValue) / payment
     }
 }
+
+/**
+ * Compute the present value of an investment.
+ *
+ * @param interestRate Interest rate per period
+ * @param numberOfPeriods Number of payment periods
+ * @param payment Payment (including interest) made in each (fixed) period
+ * @param futureValue Future value of the investment
+ * @param paymentSchedule When payments are due
+ *
+ * @return Present value of the investment
+ */
+public fun presentValue(
+    interestRate: Double,
+    numberOfPeriods: Double,
+    payment: Double,
+    futureValue: Double = 0.0,
+    paymentSchedule: PaymentSchedule = END
+): Double {
+    val totalInterestRate = (1 + interestRate).pow(numberOfPeriods)
+
+    val fact = if (interestRate == 0.0) {
+        numberOfPeriods
+    } else {
+        (1 + interestRate * paymentSchedule.numericValue) * (totalInterestRate - 1) / interestRate
+    }
+
+    return -(futureValue + payment * fact) / totalInterestRate
+}
