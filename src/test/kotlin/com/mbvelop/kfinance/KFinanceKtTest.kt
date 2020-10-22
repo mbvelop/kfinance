@@ -115,4 +115,41 @@ class KFinanceKtTest {
             result shouldBe (10.0 plusOrMinus 10.0.pow(-10))
         }
     }
+
+    @Nested
+    inner class PresentValue {
+        @Test
+        fun presentValueBasic() {
+            var result = presentValue(0.07, 20.0, 12000.0)
+            result shouldBe (-127128.1709461939327295222005 plusOrMinus 10.0.pow(-10))
+
+            result = presentValue(0.075, 20.0, -2000.0, 86609.362673042924)
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-10))
+        }
+
+        @Test
+        fun presentValuePaymentScheduleBegin() {
+            val result = presentValue(0.075, 20.0, -2000.0, 93105.064874, BEGIN)
+
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-6))
+        }
+
+        @Test
+        fun presentValueAdditionalInputValues() {
+            var result = presentValue(0.1, 5.0, 100.0, -610.510000)
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-10))
+
+            result = presentValue(0.2, 5.0, 100.0, -744.160000)
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-10))
+
+            result = presentValue(0.1, 5.0, 100.0, -671.561000, BEGIN)
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-10))
+
+            result = presentValue(0.2, 5.0, 100.0, -892.992000, BEGIN)
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-10))
+
+            result = presentValue(0.0, 5.0, 100.0, -500.0)
+            result shouldBe (0.0 plusOrMinus 10.0.pow(-10))
+        }
+    }
 }
