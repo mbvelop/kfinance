@@ -95,9 +95,8 @@ public fun numberOfPeriodicPayments(
     futureValue: Double = 0.0,
     paymentSchedule: PaymentSchedule = END
 ): Double {
-    val z = payment * (1 + interestRate * paymentSchedule.numericValue) / interestRate
-
     return if (interestRate != 0.0) {
+        val z = payment * (1 + interestRate * paymentSchedule.numericValue) / interestRate
         ln((-futureValue + z) / (presentValue + z)) / ln(1 + interestRate)
     } else {
         -(futureValue + presentValue) / payment

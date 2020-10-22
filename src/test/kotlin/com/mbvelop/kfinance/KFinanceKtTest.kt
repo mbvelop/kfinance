@@ -5,6 +5,7 @@ import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.Double.Companion.POSITIVE_INFINITY
 import kotlin.math.pow
 
 class KFinanceKtTest {
@@ -12,7 +13,7 @@ class KFinanceKtTest {
     @Nested
     inner class TotalPayment {
         @Test
-        fun totalPayment() {
+        fun totalPaymentBasic() {
             val result = totalPayment(0.08 / 12, 5 * 12.0, 15000.0)
             result shouldBe (-304.1459143262052370338701494 plusOrMinus 10.0.pow(-10))
         }
@@ -50,7 +51,7 @@ class KFinanceKtTest {
     @Nested
     inner class FutureValue {
         @Test
-        fun futureValue() {
+        fun futureValueBasic() {
             val result = futureValue(0.075, 20.0, -2000.0)
 
             result shouldBe (86609.362673042924 plusOrMinus 10.0.pow(-10))
@@ -79,6 +80,39 @@ class KFinanceKtTest {
 
             result = futureValue(0.0, 5.0, 100.0)
             result shouldBe (-500.0 plusOrMinus 10.0.pow(-10))
+        }
+    }
+
+    @Nested
+    inner class NumberOfPeriodicPayments {
+        @Test
+        fun numberOfPeriodicPaymentsBasic() {
+            var result = numberOfPeriodicPayments(0.0, -2000.0, 0.0, 100000.0)
+            result shouldBe (50.0 plusOrMinus 10.0.pow(-5))
+
+            result = numberOfPeriodicPayments(0.075, -2000.0, 0.0, 100000.0)
+            result shouldBe (21.544944 plusOrMinus 10.0.pow(-5))
+
+            result = numberOfPeriodicPayments(0.1, 0.0, -500.0, 1500.0)
+            result shouldBe (11.52670461 plusOrMinus 10.0.pow(-6))
+        }
+
+        @Test
+        fun numberOfPeriodicPaymentsPaymentScheduleBegin() {
+            val result = numberOfPeriodicPayments(0.075, -2000.0, 0.0, 100000.0, paymentSchedule = BEGIN)
+            result shouldBe (20.76156441 plusOrMinus 10.0.pow(-8))
+        }
+
+        @Test
+        fun numberOfPeriodicPaymentsInfinitePayments() {
+            val result = numberOfPeriodicPayments(0.0, -0.0, 1000.0)
+            result shouldBe POSITIVE_INFINITY
+        }
+
+        @Test
+        fun numberOfPeriodicPaymentsNoInterest() {
+            val result = numberOfPeriodicPayments(0.0, -100.0, 1000.0)
+            result shouldBe (10.0 plusOrMinus 10.0.pow(-10))
         }
     }
 }
