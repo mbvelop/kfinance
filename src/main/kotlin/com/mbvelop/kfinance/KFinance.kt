@@ -131,3 +131,21 @@ public fun presentValue(
 
     return -(futureValue + payment * fact) / totalInterestRate
 }
+
+/**
+ * Compute the net present value of a cash flow series with fixed periods.
+ *
+ * @param interestRate Interest rate per period.
+ * @param cashFlow Projected incoming cash flows at the end of each per period.
+ * @param initialInvestment Initial investment.
+ *
+ * @return Net present value of cash flow series.
+ */
+public fun netPresentValue(
+    interestRate: Double,
+    cashFlow: DoubleArray,
+    initialInvestment: Double = 0.0
+): Double {
+    val interests = DoubleArray(cashFlow.size) { (1 + interestRate).pow(it) }
+    return initialInvestment + (cashFlow / interests).sum()
+}

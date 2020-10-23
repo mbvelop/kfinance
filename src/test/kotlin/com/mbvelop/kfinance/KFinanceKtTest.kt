@@ -84,6 +84,18 @@ class KFinanceKtTest {
     }
 
     @Nested
+    inner class NetPresentValue {
+        @Test
+        fun netPresentValueBasic() {
+            var result = netPresentValue(0.08, doubleArrayOf(-40000.0, 5000.0, 8000.0, 12000.0, 30000.0))
+            result shouldBe (3065.22267 plusOrMinus 10.0.pow(-5))
+
+            result = netPresentValue(0.08, doubleArrayOf(0.0, 5000.0, 8000.0, 12000.0, 30000.0), -40000.0)
+            result shouldBe (3065.22267 plusOrMinus 10.0.pow(-5))
+        }
+    }
+
+    @Nested
     inner class NumberOfPeriodicPayments {
         @Test
         fun numberOfPeriodicPaymentsBasic() {
