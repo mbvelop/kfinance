@@ -149,3 +149,36 @@ public fun netPresentValue(
     val interests = DoubleArray(cashFlow.size) { (1 + interestRate).pow(it) }
     return initialInvestment + (cashFlow / interests).sum()
 }
+
+/**
+ * Compute the Internal Rate of Return for periodic cash flows
+ *
+ * @param cashFlow Input cash flows per time period
+ * @param financeRate Interest rate paid on the cash flows
+ */
+public fun internalRateOfReturn(
+    cashFlow: DoubleArray,
+    financeRate: Double,
+    reinvestRate: Double
+): Double {
+    val n = cashFlow.size
+    val positiveCashFlow = DoubleArray(cashFlow.size) {
+        if (cashFlow[it] < 0.0) {
+            0.0
+        } else {
+            cashFlow[it]
+        }
+    }
+    val numerator = netPresentValue(reinvestRate, positiveCashFlow)
+
+    val negativeCashFlow = DoubleArray(cashFlow.size) {
+        if (cashFlow[it] > 0.0) {
+            0.0
+        } else {
+            cashFlow[it]
+        }
+    }
+    val denominator = netPresentValue(financeRate, negativeCashFlow)
+
+    return (numerator / denominator).pow(1 / (n - 1)) * (1 + reinvestRate) - 1
+}
