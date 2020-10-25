@@ -116,3 +116,53 @@ val sourcesJar by tasks.creating(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("bintray") {
+            groupId = artifactGroup
+            artifactId = artifactName
+            version = version
+            from(components["java"])
+
+            artifact(sourcesJar)
+            artifact(dokkaJar)
+
+            pom {
+                name.set(artifactName)
+                description.set(pomDesc)
+                url.set("https://github.com/mbvelop/kfinance")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://github.com/mbvelop/kfinance/blob/master/LICENSE")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("breucode")
+                        name.set("Pascal Breuer")
+                        email.set("pbreuer@breuco.de")
+                    }
+                    developer {
+                        id.set("KadirMourat")
+                        name.set("Kadir Mourat")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/mbvelop/kfinance.git")
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = uri("https://api.bintray.com/maven/mbvelop/maven/kfinance")
+            credentials {
+                username = System.getenv("BINTRAY_USER")
+                password = System.getenv("BINTRAY_KEY")
+            }
+        }
+    }
+}
