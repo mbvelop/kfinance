@@ -2,6 +2,7 @@ package com.mbvelop.kfinance
 
 import com.mbvelop.kfinance.enums.PaymentSchedule
 import com.mbvelop.kfinance.enums.PaymentSchedule.END
+import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.pow
 
@@ -151,34 +152,77 @@ public fun netPresentValue(
 }
 
 /**
- * Compute the Internal Rate of Return for periodic cash flows
+ * Modified internal rate of return.
  *
- * @param cashFlow Input cash flows per time period
+ * @param cashFlows Cash flows (must contain at least one positive and one negative value) or
+ * <code>Double.NaN</code> is returned. The first value is considered a sunk cost at time zero
  * @param financeRate Interest rate paid on the cash flows
+ * @param reinvestRate Interest rate received on the cash flows upon reinvestment
+ *
+ * @return Modified internal rate of return
  */
-public fun internalRateOfReturn(
-    cashFlow: DoubleArray,
+public fun modifiedInternalRateOfReturn(
+    cashFlows: DoubleArray,
     financeRate: Double,
     reinvestRate: Double
 ): Double {
-    val n = cashFlow.size
-    val positiveCashFlow = DoubleArray(cashFlow.size) {
-        if (cashFlow[it] < 0.0) {
+    val n = cashFlows.size
+    val positiveCashFlow = DoubleArray(cashFlows.size) {
+        if (cashFlows[it] < 0.0) {
             0.0
         } else {
-            cashFlow[it]
+            cashFlows[it]
         }
     }
     val numerator = netPresentValue(reinvestRate, positiveCashFlow)
 
-    val negativeCashFlow = DoubleArray(cashFlow.size) {
-        if (cashFlow[it] > 0.0) {
+    val negativeCashFlow = DoubleArray(cashFlows.size) {
+        if (cashFlows[it] > 0.0) {
             0.0
         } else {
-            cashFlow[it]
+            cashFlows[it]
         }
     }
     val denominator = netPresentValue(financeRate, negativeCashFlow)
 
     return (numerator / denominator).pow(1 / (n - 1)) * (1 + reinvestRate) - 1
+}
+
+private const val MAX_ITERATION_COUNT = 20
+private const val ABSOLUTE_ACCURACY = 1E-7
+
+public fun internalRateOfReturn(cashFlows: DoubleArray, guess: Double): Double {
+    require(cashFlows.size >= 2) { "cashFlow must have at least 2 values" }
+
+    val initialInvestment = cashFlows[0]
+    val payments = cashFlows.slice(1 until cashFlows.size)
+    var x0 = guess
+
+    (0 until MAX_ITERATION_COUNT).forEach { _ ->
+        val factor = 1.0 + x0
+        var denominator = factor
+        if (denominator == 0.0) {
+            return Double.NaN
+        }
+        var fValue = initialInvestment
+        var fDerivative = 0.0
+
+        payments.forEachIndexed { index, value ->
+            fValue += value / denominator
+            denominator *= factor
+            fDerivative -= index * value / denominator
+        }
+
+        if (fDerivative == 0.0) {
+            return Double.NaN
+        }
+
+        val x1 = x0 - fValue / fDerivative
+        if (abs(x1 - x0) <= ABSOLUTE_ACCURACY) {
+            return x1
+        }
+        x0 = x1
+    }
+
+    return Double.NaN
 }
